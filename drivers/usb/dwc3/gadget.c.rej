@@ -1,0 +1,18 @@
+--- drivers/usb/dwc3/gadget.c
++++ drivers/usb/dwc3/gadget.c
+@@ -3172,9 +3172,14 @@ static irqreturn_t dwc3_check_event_buf(struct dwc3_event_buffer *evt)
+ 	u32 reg;
+ 
+ 	if (pm_runtime_suspended(dwc->dev)) {
++		dwc->pending_events = true;
++		/*
++		 * Trigger runtime resume. The get() function will be balanced
++		 * after processing the pending events in dwc3_process_pending
++		 * events().
++		 */
+ 		pm_runtime_get(dwc->dev);
+ 		disable_irq_nosync(dwc->irq_gadget);
+-		dwc->pending_events = true;
+ 		return IRQ_HANDLED;
+ 	}
+ 
